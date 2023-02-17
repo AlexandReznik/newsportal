@@ -4,13 +4,12 @@ from werkzeug.exceptions import BadRequest
 # from flask import g
 # import time
 
-
 app = Flask(__name__)
 
 
 @app.route("/")
 def index():
-    return "Hello web!"
+    return "Hello web!!!"
 
 
 @app.route("/greet/<name>/")
@@ -57,6 +56,7 @@ def custom_status_code():
 #     if hasattr(g, "start_time"):
 #         response.headers["process-time"] = time() - g.start_time
 #     return response
+
 
 @app.route("/power/")
 def power_value():
