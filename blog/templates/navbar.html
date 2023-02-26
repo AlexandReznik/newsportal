@@ -12,7 +12,16 @@
     class="nav-link {% if request.endpoint == endpoint -%}active{%- endif %}"
     >
     {{ label }}
-    </a>{%endfor%}
+    </a>
+    {%endfor%}
+        {% if current_user.is_authenticated %}
+        <a class="nav-link" href="{{ url_for('auth_app.logout') }}">Logout</a>
+        {% else %}
+        <a href="{{ url_for('auth_app.login') }}"
+        class="nav-link {% if request.endpoint == 'login' -%}active{%- endif %}">
+        Login
+        </a>
+        {% endif %}
     </div>
     </div>
     </div>
