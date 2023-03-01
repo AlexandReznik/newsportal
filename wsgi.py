@@ -28,9 +28,9 @@ def create_users():
     > done! created users: <User #1 'admin'> <User #2 'james'>
     """
 
-    admin = User(username="admin", is_staff=True)
+    # admin = User(username="admin", is_staff=True)
     james = User(username="james")
-    db.session.add(admin)
+    # db.session.add(admin)
     db.session.add(james)
     db.session.commit()
-    print("done! created users:", admin, james)
+    print("done! created users:", james)
