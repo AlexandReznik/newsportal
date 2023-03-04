@@ -1,7 +1,10 @@
-from flask import Blueprint, render_template, request, redirect, url_for
-from flask_login import LoginManager, login_user, logout_user, login_required
+from flask import Blueprint, render_template, request, redirect, url_for, current_app
+from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from blog.models import User
 import blog
+from sqlalchemy.exc import IntegrityError
+from blog.models.database import db
+from blog.forms.user import RegistrationForm
 
 auth_app = Blueprint("auth_app", __name__)
 login_manager = LoginManager()
@@ -44,6 +47,41 @@ def logout():
 @login_required
 def secret_view():
     return "Super secret data"
+
+
+@auth_app.route("/register/", methods=["GET", "POST"], endpoint="register")
+def register():
+    if current_user.is_authenticated:
+        return redirect("index")
+
+    error = None
+    form = RegistrationForm(request.form)
+    if request.method == "POST" and form.validate_on_submit():
+        if User.query.filter_by(username=form.username.data).count():
+            form.username.errors.append("username already exists!")
+            return render_template("auth/register.html", form=form)
+
+        if User.query.filter_by(email=form.email.data).count():
+            form.email.errors.append("email already exists!")
+            return render_template("auth/register.html", form=form)
+        user = User(
+            fullname=form.fullname.data,
+            username=form.username.data,
+            email=form.email.data,
+            is_staff=False,
+        )
+        user.password = form.password.data
+        db.session.add(user)
+        try:
+            db.session.commit()
+        except IntegrityError:
+            current_app.logger.exception("Could not create user!")
+            error = "Could not create user!"
+        else:
+            current_app.logger.info("Created user %s", user)
+            login_user(user)
+            return redirect(url_for("index"))
+    return render_template("auth/register.html", form=form, error=error)
 
 
 __all__ = [
