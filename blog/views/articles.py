@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, current_app, redirect, url_for
+from flask import Blueprint, render_template, request, current_app, redirect, url_for, abort
 from flask_login import login_required, current_user
 from sqlalchemy.exc import IntegrityError
 from werkzeug.exceptions import NotFound
@@ -15,6 +15,15 @@ articles_app = Blueprint('articles_app', __name__)
 def articles_list():
     articles = Article.query.all()
     return render_template('articles/list.html', articles=articles)
+
+
+@articles_app.route('/<int:author_id>/articles/', endpoint="author_articles")
+def show_author_articles(author_id):
+    author = Author.query.get(author_id)
+    if author is None:
+        abort(404)
+    articles = Article.query.filter_by(author_id=author_id).all()
+    return render_template('authors/author_articles.html', author=author, articles=articles)
 
 
 @articles_app.route("/<int:article_id>/", endpoint="details")

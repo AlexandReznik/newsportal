@@ -1,6 +1,6 @@
-from flask import Blueprint, render_template
+from flask import Blueprint, render_template, abort
 from werkzeug.exceptions import NotFound
-from blog.models import User
+from blog.models import User, Author, Article
 
 users_app = Blueprint("users_app", __name__)
 # USERS = {
@@ -25,6 +25,24 @@ def user_profile(user_id: int):
         return render_template('users/profile.html', user=user)
     else:
         return 'User not found'
+
+
+@users_app.route('/<int:author_id>/articles/', endpoint="user_articles")
+def show_author_articles(author_id):
+    author = Author.query.get(author_id)
+    if author is None:
+        abort(404)
+    articles = Article.query.filter_by(author_id=author_id).all()
+    return render_template('articles/user_articles.html', author=author, articles=articles)
+# @users_app.route('/<int:user_id>/user-articles/', endpoint="user_articles")
+# def show_user_articles(user_id):
+#     user = User.query.(user_id)
+#     author = Author.query.filter_by()
+    # author = Author.query.get(user)
+    # if user is None:
+    #     raise NotFound
+    # articles = author.articles.all()
+    # return render_template('user_articles.html', user=user, articles=articles)
 
 
 @users_app.route("/", endpoint='list')
