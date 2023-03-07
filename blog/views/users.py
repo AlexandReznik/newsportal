@@ -18,6 +18,15 @@ def user_details(user_id: int):
     return render_template("users/details.html", user=user)
 
 
+@users_app.route("/my_profile/<int:user_id>/", endpoint="profile")
+def user_profile(user_id: int):
+    user = User.query.filter_by(id=user_id)
+    if user:
+        return render_template('users/profile.html', user=user)
+    else:
+        return 'User not found'
+
+
 @users_app.route("/", endpoint='list')
 def users_list():
     users = User.query.all()
