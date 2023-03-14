@@ -1,7 +1,6 @@
 from blog.models.database import db
 from flask import Flask, render_template
-# from flask import request
-# from werkzeug.exceptions import BadRequest
+from blog.admin import admin
 from blog.views.users import users_app
 from blog.views.articles import articles_app
 from blog.models import User
@@ -42,6 +41,7 @@ app.config.from_object(f"blog.configs.{cfg_name}")
 # app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 login_manager.init_app(app)
 db.init_app(app)
+admin.init_app(app)
 
 
 @app.cli.command("create-admin")
