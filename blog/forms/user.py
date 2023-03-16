@@ -1,5 +1,6 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, validators, PasswordField, SubmitField
+from flask_wtf.file import FileField, FileAllowed
 
 
 class UserBaseForm(FlaskForm):
@@ -27,6 +28,8 @@ class RegistrationForm(UserBaseForm):
             validators.EqualTo("confirm", message="Passwords must match"),
         ],
     )
+    # profile_pic = FileField("Avatar", validators=[
+    #                         FileAllowed(['jpg', 'png', 'jpeg'], 'Images only!')])
     confirm = PasswordField("Repeat Password")
     submit = SubmitField("Register")
 

@@ -3,7 +3,7 @@
     {{ author.user.username }}
 {% endblock %}
 {% block body %}
-    <h1>{{ author.user.username }}</h1>
+    <h1><img src="{{ author.user.avatar(40) }}"/>{{ author.user.username }}</h1>
     <div>
         <ul>
         {% for article in articles %}

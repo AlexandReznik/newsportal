@@ -7,10 +7,14 @@ from blog.models.database import db
 # from blog.forms.user import RegistrationForm
 from werkzeug.exceptions import NotFound
 from blog.forms.user import RegistrationForm, LoginForm
+from werkzeug.utils import secure_filename
+import uuid
+import os
+# import blog.app
+
 
 auth_app = Blueprint("auth_app", __name__)
 login_manager = LoginManager()
-# login_manager.init_app(auth)
 login_manager.login_view = "auth_app.login"
 
 
@@ -75,12 +79,30 @@ def register():
         if User.query.filter_by(email=form.email.data).count():
             form.email.errors.append("email already exists!")
             return render_template("auth/register.html", form=form)
+
         user = User(
             fullname=form.fullname.data,
             username=form.username.data,
             email=form.email.data,
             is_staff=False,
         )
+        # profile_pic = form.profile_pic.data
+        # if profile_pic:
+        #     filename = secure_filename(profile_pic.filename)
+        #     profile_pic.save('./blog/images/' + filename)
+        #     user.profile_pic = filename
+        # user.profile_pic = form.profile_pic.data
+        # avatar = user.profile_pic
+        # if avatar:
+        #     filename = secure_filename(avatar.filename)
+        #     avatar.save('images/' + filename)
+        #     user.profile_pic = filename
+        # user.profile_pic = form.profile_pic.data
+        # filename = secure_filename(user.profile_pic.filename)
+        # pic_name = str(uuid.uuid1()) + "_" + filename
+        # user.profile_pic.save(os.path.join(
+        #     'images/'), pic_name)
+        # user.profile_pic = pic_name
         user.password = form.password.data
         db.session.add(user)
         try:
