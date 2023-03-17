@@ -8,8 +8,8 @@ from blog.models.database import db
 from werkzeug.exceptions import NotFound
 from blog.forms.user import RegistrationForm, LoginForm
 from werkzeug.utils import secure_filename
-import uuid
-import os
+# import uuid
+# import os
 # import blog.app
 
 
