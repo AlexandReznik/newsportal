@@ -15,11 +15,13 @@
     <hr>
     <p><strong>Email:</strong> {{ current_user.email }}</p>
     <p>Fullname: {{ current_user.fullname }}</p>
-    
+    <hr>
     {% if current_user.author.id %}
         <a href="{{ url_for('users_app.user_articles', author_id=current_user.author.id) }}">Your articles</a>
     {% endif %}
     {% endif %}
+    <br>
+    <a href="{{ url_for('articles_app.create') }}">Create new article</a>
     
     
 {% endblock %}
