@@ -9,7 +9,9 @@ import os
 from flask_migrate import Migrate
 from blog.security import flask_bcrypt
 from blog.views.authors import authors_app
-# from blog.api import init_api
+from blog.api import init_api
+from flask_wtf import CSRFProtect
+csrf = CSRFProtect()
 
 
 app = Flask(__name__)
@@ -29,7 +31,6 @@ def index():
 
 app.register_blueprint(users_app, url_prefix="/users")
 app.register_blueprint(articles_app, url_prefix="/articles")
-# app.config["SECRET_KEY"] = "abcdefg123456"
 app.register_blueprint(authors_app, url_prefix="/authors")
 app.register_blueprint(auth_app, url_prefix="/auth")
 
@@ -38,12 +39,10 @@ cfg_name = os.environ.get("CONFIG_NAME") or "BaseConfig"
 app.config.from_object(f"blog.configs.{cfg_name}")
 
 
-# app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///db.sqlite"
-# app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 login_manager.init_app(app)
 db.init_app(app)
 admin.init_app(app)
-# api = init_api(app)
+api = init_api(app)
 
 
 @app.cli.command("create-admin")

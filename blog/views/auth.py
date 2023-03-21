@@ -4,13 +4,9 @@ from blog.models import User
 import blog
 from sqlalchemy.exc import IntegrityError
 from blog.models.database import db
-# from blog.forms.user import RegistrationForm
 from werkzeug.exceptions import NotFound
 from blog.forms.user import RegistrationForm, LoginForm
 from werkzeug.utils import secure_filename
-# import uuid
-# import os
-# import blog.app
 
 
 auth_app = Blueprint("auth_app", __name__)
