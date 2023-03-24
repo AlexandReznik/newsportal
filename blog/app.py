@@ -1,84 +1,79 @@
-from flask import Flask
-from flask import request
-from werkzeug.exceptions import BadRequest
-# from flask import g
-# import time
+from blog.models.database import db
+from flask import Flask, render_template
+from blog.admin import admin
+from blog.views.users import users_app
+from blog.views.articles import articles_app
+from blog.models import User
+from blog.views.auth import login_manager, auth_app
+import os
+from flask_migrate import Migrate
+from blog.security import flask_bcrypt
+from blog.views.authors import authors_app
+from blog.api import init_api
+from flask_wtf import CSRFProtect
+csrf = CSRFProtect()
 
 
 app = Flask(__name__)
 
 
+migrate = Migrate()
+migrate.init_app(app, db)
+
+
+flask_bcrypt.init_app(app)
+
+
 @app.route("/")
 def index():
-    return "Hello web!"
+    return render_template('index.html')
 
 
-@app.route("/greet/<name>/")
-def greet_name(name: str):
-    return f"Hello {name}!"
+app.register_blueprint(users_app, url_prefix="/users")
+app.register_blueprint(articles_app, url_prefix="/articles")
+app.register_blueprint(authors_app, url_prefix="/authors")
+app.register_blueprint(auth_app, url_prefix="/auth")
 
 
-@app.route("/user/")
-def read_user():
-    name = request.args.get("name")
-    surname = request.args.get("surname")
-    return f"User {name or '[no name]'} {surname or '[no surname]'}"
+cfg_name = os.environ.get("CONFIG_NAME") or "BaseConfig"
+app.config.from_object(f"blog.configs.{cfg_name}")
 
 
-@app.route("/status/", methods=["GET", "POST"])
-def custom_status_code():
-    if request.method == "GET":
-        return """\
-        To get response with custom status code
-        send request using POST method
-        and pass `code` in JSON body / FormData
-        """
-    print("raw bytes data:", request.data)
-    if request.form and "code" in request.form:
-        return "code from form", request.form["code"]
-    if request.json and "code" in request.json:
-        return "code from json", request.json["code"]
-    return "", 204
+login_manager.init_app(app)
+db.init_app(app)
+admin.init_app(app)
+api = init_api(app)
 
 
-# @app.before_request
-# def process_before_request():
-#     """
-#     Sets start_time to `g` object
-#     """
-#     g.start_time = time()
+@app.cli.command("create-admin")
+def create_admin():
+    """
+    Run in your terminal:
+    ➜ flask create-admin
+    > created admin: <User #1 'admin'>
+    """
+    admin = User(username="Admin", email="Admin@Admin.com", is_staff=True)
+    admin.password = os.environ.get("ADMIN_PASSWORD") or "adminpass"
+    db.session.add(admin)
+    db.session.commit()
+    print("created admin:", admin)
 
 
-# @app.after_request
-# def process_after_request(response):
-#     """
-#     adds process time in headers
-#     """
-#     if hasattr(g, "start_time"):
-#         response.headers["process-time"] = time() - g.start_time
-#     return response
-
-@app.route("/power/")
-def power_value():
-    x = request.args.get("x") or ""
-    y = request.args.get("y") or ""
-    if not (x.isdigit() and y.isdigit()):
-        app.logger.info("invalid values for power: x=%r and y=%r", x, y)
-        raise BadRequest("please pass integers in `x` and `y` query params")
-    x = int(x)
-    y = int(y)
-    result = x ** y
-    app.logger.debug("%s ** %s = %s", x, y, result)
-    return str(result)
-
-
-@app.route("/divide-by-zero/")
-def do_zero_division():
-    return 1 / 0
-
-
-@app.errorhandler(ZeroDivisionError)
-def handle_zero_division_error(error):
-    print(error)
-    app.logger.exception("Here's traceback for zero division error")
-    return "Never divide by zero!", 400
+@app.cli.command("create-tags")
+def create_tags():
+    """
+    Run in your terminal:
+    ➜ flask create-tags
+    """
+    from blog.models import Tag
+    for name in [
+        "flask",
+        "django",
+        "python",
+        "sqlalchemy",
+        "news",
+    ]:
+        tag = Tag(name=name)
+        db.session.add(tag)
+    db.session.commit()
+    print("created tags")
